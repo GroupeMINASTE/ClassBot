@@ -34,6 +34,6 @@ client.on('message', message => {
 
   // Handle commands
   if (command == 'ping') {
-    message.reply('Pong'):
+    message.reply('Pong');
   }
 });
