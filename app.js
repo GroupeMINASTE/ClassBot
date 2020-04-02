@@ -17,6 +17,9 @@ const db = new sqlite3.Database('./database.db', (err) => {
   console.log('Connected to database!');
 });
 
+// Setup database
+
+
 // when the client is ready, run this code
 // this event will only trigger one time after logging in
 client.once('ready', () => {
@@ -35,5 +38,10 @@ client.on('message', message => {
   // Handle commands
   if (command == 'ping') {
     message.reply('Pong');
+  } else if (command == 'myid') {
+    message.reply('Your id: ' + message.author.id);
   }
 });
+
+// login to Discord with your app's token
+client.login(process.env.TOKEN);
