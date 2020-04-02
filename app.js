@@ -31,9 +31,9 @@ const db = new sqlite3.Database('./database.db', (err) => {
 });
 
 // Setup database
-db.run('CREATE TABLE IF NOT EXISTS `profs` (`id` int(11) NOT NULL, `user` bigint(11) NOT NULL, `name` varchar(255) NOT NULL, PRIMARY KEY (`id`));');
-db.run('CREATE TABLE IF NOT EXISTS `cours` (`id` int(11) NOT NULL, `prof` int(11) NOT NULL, `start` datetime NOT NULL, PRIMARY KEY (`id`));');
-db.run('CREATE TABLE IF NOT EXISTS `devoirs` (`id` int(11) NOT NULL, `prof` int(11) NOT NULL, `content` text NOT NULL, `due` datetime NOT NULL, PRIMARY KEY (`id`));');
+db.run('CREATE TABLE IF NOT EXISTS `profs` (`id` int(11) NOT NULL AUTOINCREMENT, `user` bigint(11) NOT NULL, `name` varchar(255) NOT NULL, PRIMARY KEY (`id`));');
+db.run('CREATE TABLE IF NOT EXISTS `cours` (`id` int(11) NOT NULL AUTOINCREMENT, `prof` int(11) NOT NULL, `start` datetime NOT NULL, PRIMARY KEY (`id`));');
+db.run('CREATE TABLE IF NOT EXISTS `devoirs` (`id` int(11) NOT NULL AUTOINCREMENT, `prof` int(11) NOT NULL, `content` text NOT NULL, `due` datetime NOT NULL, PRIMARY KEY (`id`));');
 
 // when the client is ready, run this code
 // this event will only trigger one time after logging in
@@ -70,7 +70,7 @@ client.on('message', message => {
           message.channel.send('Parfait, <@' + args[0] + '> est maintenant défini(e) comme professeur(e) de ' + args[1])
         });
       } else {
-        message.reply('Il y a un problème avec ta commande.');
+        message.reply('Il y a un problème avec ta commande, essaye $prof <id> <matière>');
       }
     } else {
       message.reply('Tu n\'as pas le droit de gérer la liste des professeurs, demande à <@238894740534198274> de le faire.');
