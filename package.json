@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "main": "app.js",
+    "start": "app.js",
     "test": "app.js"
   },
   "author": "",
