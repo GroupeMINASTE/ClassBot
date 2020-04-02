@@ -1,7 +1,7 @@
 // require the discord.js and sqlite3 modules
 const Discord = require('discord.js');
 const sqlite3 = require('sqlite3').verbose();
-const http = require('http');
+const https = require('https');
 const express = require('express');
 
 // Support for HTTP
@@ -12,7 +12,7 @@ app.get('/', (request, response) => {
 });
 app.listen(process.env.PORT || 3000, () => console.log('Web server is running...'));
 setInterval(() => {
-  http.get('https://classbot-nathanfallet.herokuapp.com');
+  https.get('https://classbot-nathanfallet.herokuapp.com');
 }, 280000);
 
 // create a new Discord client
@@ -47,7 +47,7 @@ client.on('message', message => {
   if (!message.content.startsWith('$') || message.author.bot) return;
 
   // Get args and command
-  const args = message.content.slice(1).split(' ');
+  const args = message.content.slice(1).split(/ +/);
   const command = args.shift().toLowerCase();
 
   // Handle commands
@@ -56,7 +56,25 @@ client.on('message', message => {
     message.reply('Pong');
   } else if (command == 'prof') {
     // Add a teacher
+    if (message.author.id == 238894740534198274) {
+      if (args.length == 2) {
+        message.reply('J\'ajoute ça tout de suite dans la base de données...');
 
+        // Add to database
+        db.run(`INSERT INTO profs (user, name) VALUES(?, ?)`, args, function(err) {
+          if (err) {
+            return console.log(err.message);
+          }
+
+          // Confirme
+          message.channel.send('Parfait, <@' + args[0] + '> est maintenant défini(e) comme professeur(e) de ' + args[1])
+        });
+      } else {
+        message.reply('Il y a un problème avec ta commande.');
+      }
+    } else {
+      message.reply('Tu n\'as pas le droit de gérer la liste des professeurs, demande à <@238894740534198274> de le faire.');
+    }
   }
 });
 
