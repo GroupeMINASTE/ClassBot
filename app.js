@@ -31,9 +31,9 @@ const db = new sqlite3.Database('./database.db', (err) => {
 });
 
 // Setup database
-db.run('CREATE TABLE IF NOT EXISTS `profs` (`id` int(11) NOT NULL AUTOINCREMENT, `user` bigint(11) NOT NULL, `name` varchar(255) NOT NULL, PRIMARY KEY (`id`));');
-db.run('CREATE TABLE IF NOT EXISTS `cours` (`id` int(11) NOT NULL AUTOINCREMENT, `prof` int(11) NOT NULL, `start` datetime NOT NULL, PRIMARY KEY (`id`));');
-db.run('CREATE TABLE IF NOT EXISTS `devoirs` (`id` int(11) NOT NULL AUTOINCREMENT, `prof` int(11) NOT NULL, `content` text NOT NULL, `due` datetime NOT NULL, PRIMARY KEY (`id`));');
+db.run('CREATE TABLE IF NOT EXISTS `profs` (`id` int(11) NOT NULL PRIMARY KEY, `user` bigint(11) NOT NULL, `name` varchar(255) NOT NULL,);');
+db.run('CREATE TABLE IF NOT EXISTS `cours` (`id` int(11) NOT NULL PRIMARY KEY, `prof` int(11) NOT NULL, `start` datetime NOT NULL);');
+db.run('CREATE TABLE IF NOT EXISTS `devoirs` (`id` int(11) NOT NULL PRIMARY KEY, `prof` int(11) NOT NULL, `content` text NOT NULL, `due` datetime NOT NULL);');
 
 // when the client is ready, run this code
 // this event will only trigger one time after logging in
