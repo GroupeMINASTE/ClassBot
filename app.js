@@ -32,7 +32,7 @@ client.on('message', message => {
   if (!message.content.startsWith('$') || message.author.bot) return;
 
   // Get args and command
-  const args = message.content.slice(prefix.length).split(' ');
+  const args = message.content.slice(1).split(' ');
   const command = args.shift().toLowerCase();
 
   // Handle commands
