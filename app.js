@@ -1,4 +1,7 @@
-// require the discord.js and sqlite3 modules
+// Set timezone
+process.env.TZ = 'Europe/Paris';
+
+// Require the modules
 const Discord = require('discord.js');
 const mysql = require('mysql');
 const https = require('https');
@@ -8,7 +11,7 @@ const express = require('express');
 // Support for HTTP
 const app = express();
 
-// create a new Discord client
+// Create a new Discord client
 const client = new Discord.Client();
 
 // Connect to the database
