@@ -136,14 +136,14 @@ con.connect(function(err) {
             return console.error(error.message);
           }
           if (results && results.length > 0) {
-            con.query('SELECT * FROM profs WHERE user = ? AND name = ?', [message.author.id, args[0]], (error, profs, fields) => {
+            con.query('SELECT * FROM profs WHERE user = ? AND name = ?', [message.author.id, args.shift()], (error, profs, fields) => {
               if (error) {
                 return console.error(error.message);
               }
               if (profs && profs.length > 0) {
                 // Get date and time
-                var date = args[1].split('/');
-                var heure = args[2].split(':');
+                var date = args.shift().split('/');
+                var heure = args.shift().split(':');
 
                 // Check length
                 if (date.length == 3 && heure.length == 2) {
@@ -171,6 +171,53 @@ con.connect(function(err) {
         });
       } else {
         message.reply('Il y a un problème avec ta commande, essaye `$cours <matière> <jour/mois/année> <heure:minutes>`');
+      }
+    }
+
+    // Add an homework
+    else if (command == 'devoirs') {
+      if (args.length > 3) {
+        // Get teacher for this sender
+        con.query('SELECT * FROM profs WHERE user = ?', [message.author.id], (error, results, fields) => {
+          if (error) {
+            return console.error(error.message);
+          }
+          if (results && results.length > 0) {
+            con.query('SELECT * FROM profs WHERE user = ? AND name = ?', [message.author.id, args.shift()], (error, profs, fields) => {
+              if (error) {
+                return console.error(error.message);
+              }
+              if (profs && profs.length > 0) {
+                // Get date and time
+                var date = args.shift().split('/');
+                var heure = args.shift().split(':');
+
+                // Check length
+                if (date.length == 3 && heure.length == 2) {
+                  message.reply('J\'ajoute ça tout de suite dans la base de données...');
+
+                  // Add to database
+                  con.query('INSERT INTO devoirs (prof, due, content) VALUES(?, ?, ?)', [profs[0].id, date[2] + '-' + date[1] + '-' + date[0] + ' ' + heure[0] + ':' + heure[1], args.join(' ')], (err, results, fields) => {
+                    if (err) {
+                      return console.error(err.message);
+                    }
+
+                    // Confirme
+                    message.channel.send('Parfait, les devoirs ont été programmé !');
+                  });
+                } else {
+                  message.reply('La date ou l\'heure n\'est pas au bon format, essaye `jj/mm/aaaa hh:mm`');
+                }
+              } else {
+                message.reply('La matière demandée n\'est pas dans la base de données, ou vous n\'êtes pas professeur de cette matière.');
+              }
+            });
+          } else {
+            message.reply('Seuls les professeurs peuvent ajouter des devoirs.');
+          }
+        });
+      } else {
+        message.reply('Il y a un problème avec ta commande, essaye `$devoirs <matière> <jour/mois/année> <heure:minutes> <contenu>`');
       }
     }
 
@@ -211,6 +258,25 @@ con.connect(function(err) {
 
           // Add string
           string += '\n- `' + name +', ' + moment(date).format('[le] DD/MM/YYYY [à] HH:mm') +'`';
+        }
+        message.channel.send(string);
+      });
+
+      // Fetch all homeworks
+      con.query('SELECT devoirs.id as id, profs.name as name, devoirs.due as due, devoirs.content as content, profs.user as user FROM devoirs LEFT JOIN profs ON devoirs.prof = profs.id ORDER BY due', (err, results, fields) => {
+        if (err) {
+          return console.error(err.message);
+        }
+
+        // List them
+        var string = 'Voici les devoirs à venir :';
+        for (cour in results) {
+          var name = results[cour].name;
+          var content = results[cour].content;
+          var date = new Date(results[cour].start);
+
+          // Add string
+          string += '\n- `' + name +', pour ' + moment(date).format('[le] DD/MM/YYYY') +'` : ' + content;
         }
         message.channel.send(string);
       });

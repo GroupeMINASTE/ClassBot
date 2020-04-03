@@ -20,5 +20,6 @@ Variables d'environment à définir :
 
 - `$prof <id> <matière>` : Ajoute un prof pour la matière
 - `$cours <matière> <jour/mois/année> <heure:minutes>` : Ajoute un cours dans la matière aux horaires données
+- `$devoirs <matière> <jour/mois/année> <heure:minutes> <contenu>` : Ajoute des devoirs
 - `$matières` : Liste les matières et les professeurs
 - `$liste` : Liste les cours et les devoirs
