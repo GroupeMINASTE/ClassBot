@@ -47,7 +47,36 @@ con.connect(function(err) {
   // when the client is ready, run this code
   // this event will only trigger one time after logging in
   client.once('ready', () => {
+    // Log
   	console.log('Ready!');
+
+    // Run to check for a course
+    setInterval(() => {
+      // Fetch all courses
+      con.query('SELECT cours.id as id, profs.name as name, cours.start as start FROM cours LEFT JOIN profs ON cours.prof = profs.id', (err, results, fields) => {
+        if (err) {
+          return console.error(err.message);
+        }
+
+        // Get current interval
+        var before = moment();
+        var after = moment().add(5, 'minutes');
+
+        // Check if one is about to start
+        for (cour in results) {
+          var name = results[cour].name;
+          var date = new Date(results[cour].start);
+
+          // Check time
+          if (moment(date).isBetween(before, after)) {
+            // Course will start soon
+            client.channels.fetch('695281383991672927').then(channel => {
+              channel.send('<@689751752198586436> Le cours de `' + name + ' ' + moment(date).format('[du] DD/MM/YY [à] HH:mm') + '` va bientôt commencer !')
+            }).catch(console.error);
+          }
+        }
+      });
+    }, 300000);
   });
 
   // Listen for messages
@@ -154,34 +183,6 @@ con.connect(function(err) {
       });
     }
   });
-
-  // Run to check for a course
-  setInterval(() => {
-    // Fetch all courses
-    con.query('SELECT cours.id as id, profs.name as name, cours.start as start FROM cours LEFT JOIN profs ON cours.prof = profs.id', (err, results, fields) => {
-      if (err) {
-        return console.error(err.message);
-      }
-
-      // Get current interval
-      var before = moment();
-      var after = moment().add(5, 'minutes');
-
-      // Check if one is about to start
-      for (cour in results) {
-        var name = results[cour].name;
-        var date = new Date(results[cour].start);
-
-        // Check time
-        if (moment(date).isBetween(before, after)) {
-          // Course will start soon
-          client.channels.fetch('695281383991672927').then(channel => {
-            channel.send('<@689751752198586436> Le cours de `' + name + ' ' + moment(date).format('[du] DD/MM/YY [à] HH:mm') + '` va bientôt commencer !')
-          }).catch(console.error);
-        }
-      }
-    });
-  }, 300000);
 
   // login to Discord with your app's token
   client.login(process.env.TOKEN);
