@@ -75,13 +75,60 @@ con.connect(function(err) {
             }
 
             // Confirme
-            message.channel.send('Parfait, <@' + args[0] + '> est maintenant défini(e) comme professeur(e) de ' + args[1])
+            message.channel.send('Parfait, <@' + args[0] + '> est maintenant défini(e) comme professeur(e) de ' + args[1]);
           });
         } else {
-          message.reply('Il y a un problème avec ta commande, essaye $prof <id> <matière>');
+          message.reply('Il y a un problème avec ta commande, essaye `$prof <id> <matière>');
         }
       } else {
         message.reply('Tu n\'as pas le droit de gérer la liste des professeurs, demande à <@238894740534198274> de le faire.');
+      }
+    }
+
+    // Add a course
+    else if (command == 'cours') {
+      if (args.length == 3) {
+        // Get teacher for this sender
+        con.query('SELECT * FROM profs WHERE user = ?', [message.author.id], (error, results, fields) => {
+          if (error) {
+            return console.error(error.message);
+          }
+          if (results) {
+            con.query('SELECT * FROM profs WHERE user = ? AND name = ?', [message.author.id, args[0]], (error, results, fields) => {
+              if (error) {
+                return console.error(error.message);
+              }
+              if (results) {
+                // Get date and time
+                var date = args[1].split('/');
+                var heure = args[2].split(':');
+
+                // Check length
+                if (date.length == 3 && heure.length == 2) {
+                  message.reply('J\'ajoute ça tout de suite dans la base de données...');
+
+                  // Add to database
+                  con.query('INSERT INTO cours (prof, start) VALUES(?, ?)', [results[0].id, date[2] + '-' + date[1] + '-' + date[0] + ' ' + heure[0] + ':' + heure[1]], (err, results, fields) => {
+                    if (err) {
+                      return console.error(err.message);
+                    }
+
+                    // Confirme
+                    message.channel.send('Parfait, le cours a été programmé !');
+                  });
+                } else {
+                  message.reply('La date ou l\'heure n\'est pas au bon format, essaye `jj/mm/aaaa hh:mm`');
+                }
+              } else {
+                message.reply('La matière demandée n\'est pas dans la base de données, ou vous n\'êtes pas professeur de cette matière.');
+              }
+            });
+          } else {
+            message.reply('Seuls les professeurs peuvent ajouter des cours.');
+          }
+        });
+      } else {
+        message.reply('Il y a un problème avec ta commande, essaye `$cours <matière> <jour/mois/année> <heure:minutes>`');
       }
     }
   });
