@@ -1,6 +1,3 @@
-// Set timezone
-process.env.TZ = 'Europe/Paris';
-
 // Require the modules
 const Discord = require('discord.js');
 const mysql = require('mysql');
@@ -58,26 +55,36 @@ con.connect(function(err) {
       https.get('https://classbot-nathanfallet.herokuapp.com');
 
       // Fetch all courses
-      con.query('SELECT cours.id as id, profs.name as name, cours.start as start FROM cours LEFT JOIN profs ON cours.prof = profs.id', (err, results, fields) => {
+      con.query('SELECT cours.id as id, profs.name as name, cours.start as start, profs.user as user FROM cours LEFT JOIN profs ON cours.prof = profs.id', (err, results, fields) => {
         if (err) {
           return console.error(err.message);
         }
 
         // Get current interval
-        var before = moment();
-        var after = moment().add(5, 'minutes');
+        var before = moment().subtract(5, 'minutes');
+        var after = moment();
+        var expired = moment().add(1, 'hours');
 
         // Check if one is about to start
         for (cour in results) {
+          var id = results[cour].id;
           var name = results[cour].name;
           var date = new Date(results[cour].start);
+          var user = results[cour].user;
 
           // Check time
           if (moment(date).isBetween(before, after)) {
             // Course will start soon
-            client.channels.fetch('695281383991672927').then(channel => {
-              channel.send('<@689751752198586436> Le cours de `' + name + ' ' + moment(date).format('[du] DD/MM/YYYY [à] HH:mm') + '` va bientôt commencer !')
+            client.channels.fetch(process.env.CHANNEL).then(channel => {
+              channel.send('<@' + process.env.ROLE + '> Le cours de `' + name + ' ' + moment(date).format('[du] DD/MM/YYYY [à] HH:mm') + '` avec <@' + user + '> va bientôt commencer !')
             }).catch(console.error);
+          } else if (moment(date).isAfter(expired)) {
+            // Delete the course
+            con.query('DELETE FROM cours WHERE id = ?', [id], (err, results, fields) => {
+              if (err) {
+                return console.error(err.message);
+              }
+            });
           }
         }
       });
@@ -99,7 +106,7 @@ con.connect(function(err) {
       message.reply('Pong');
     } else if (command == 'prof') {
       // Add a teacher
-      if (message.author.id == 238894740534198274) {
+      if (message.author.id == process.env.OWNER) {
         if (args.length == 2) {
           message.reply('J\'ajoute ça tout de suite dans la base de données...');
 
@@ -116,7 +123,7 @@ con.connect(function(err) {
           message.reply('Il y a un problème avec ta commande, essaye `$prof <id> <matière>');
         }
       } else {
-        message.reply('Tu n\'as pas le droit de gérer la liste des professeurs, demande à <@238894740534198274> de le faire.');
+        message.reply('Tu n\'as pas le droit de gérer la liste des professeurs, demande à <@' + process.env.OWNER + '> de le faire.');
       }
     }
 
@@ -170,7 +177,7 @@ con.connect(function(err) {
     // List courses
     else if (command == 'liste') {
       // Fetch all courses
-      con.query('SELECT cours.id as id, profs.name as name, cours.start as start FROM cours LEFT JOIN profs ON cours.prof = profs.id', (err, results, fields) => {
+      con.query('SELECT cours.id as id, profs.name as name, cours.start as start, profs.user as user FROM cours LEFT JOIN profs ON cours.prof = profs.id', (err, results, fields) => {
         if (err) {
           return console.error(err.message);
         }
