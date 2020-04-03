@@ -88,6 +88,42 @@ con.connect(function(err) {
           }
         }
       });
+
+      // Fetch all homeworks
+      con.query('SELECT devoirs.id as id, profs.name as name, devoirs.due as due, devoirs.content as content, profs.user as user FROM devoirs LEFT JOIN profs ON devoirs.prof = profs.id ORDER BY due', (err, results, fields) => {
+        if (err) {
+          return console.error(err.message);
+        }
+
+        // Get current interval
+        var before = moment();
+        var after = moment().add(5, 'minutes');
+        var expired = moment().add(1, 'days');
+
+        // Check if one is about to start
+        for (cour in results) {
+          var id = results[cour].id;
+          var name = results[cour].name;
+          var content = results[cour].content;
+          var date = new Date(results[cour].due);
+          var user = results[cour].user;
+
+          // Check time
+          if (moment(date).isBetween(before, after)) {
+            // Course will start soon
+            client.channels.fetch(process.env.CHANNEL).then(channel => {
+              channel.send('<@' + process.env.ROLE + '> Les devoirs de `' + name + ' pour ' + moment(date).format('[le] DD/MM/YYYY') + '` sont à rendre à <@' + user + '> !```' + content + '```')
+            }).catch(console.error);
+          } else if (moment(date).isAfter(expired)) {
+            // Delete the course
+            con.query('DELETE FROM devoirs WHERE id = ?', [id], (err, results, fields) => {
+              if (err) {
+                return console.error(err.message);
+              }
+            });
+          }
+        }
+      });
     }, 300000);
   });
 
@@ -257,7 +293,7 @@ con.connect(function(err) {
           var date = new Date(results[cour].start);
 
           // Add string
-          string += '\n- `' + name +', ' + moment(date).format('[le] DD/MM/YYYY [à] HH:mm') +'`';
+          string += '```' + name +', ' + moment(date).format('[le] DD/MM/YYYY [à] HH:mm') +'```';
         }
         message.channel.send(string);
       });
@@ -276,7 +312,7 @@ con.connect(function(err) {
           var date = new Date(results[cour].due);
 
           // Add string
-          string += '\n- `' + name +', pour ' + moment(date).format('[le] DD/MM/YYYY') +'` : ' + content;
+          string += '```' + name +', pour ' + moment(date).format('[le] DD/MM/YYYY') +' : ' + content + '```';
         }
         message.channel.send(string);
       });
