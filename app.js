@@ -143,7 +143,9 @@ con.connect(function(err) {
         // List them
         var string = 'Voici les cours à venir :';
         for (cour in results) {
-          string += '\n- `' + results[cour].name +'` à `' + results[cour].start +'`';
+          var name = results[cour].name;
+          var date = new Date(results[cour].start);
+          string += '\n- `' + name +'` => `' + date.toLocaleDateString('fr-FR') +'`';
         }
         message.channel.send(string);
       });
