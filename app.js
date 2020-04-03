@@ -61,8 +61,8 @@ con.connect(function(err) {
         }
 
         // Get current interval
-        var before = moment().subtract(5, 'minutes');
-        var after = moment();
+        var before = moment();
+        var after = moment().add(5, 'minutes');
         var expired = moment().add(1, 'hours');
 
         // Check if one is about to start
