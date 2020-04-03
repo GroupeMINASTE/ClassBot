@@ -135,7 +135,7 @@ con.connect(function(err) {
     // List courses
     else if (command == 'liste') {
       // Fetch all courses
-      con.query('SELECT * FROM cours LEFT JOIN profs ON cours.prof = profs.id', (err, results, fields) => {
+      con.query('SELECT cours.id as id, profs.name as name, cours.start as start FROM cours LEFT JOIN profs ON cours.prof = profs.id', (err, results, fields) => {
         if (err) {
           return console.error(err.message);
         }
