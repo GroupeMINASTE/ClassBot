@@ -7,14 +7,6 @@ const express = require('express');
 
 // Support for HTTP
 const app = express();
-app.get('/', (request, response) => {
-  console.log(Date.now() + ' Ping Received');
-  response.sendStatus(200);
-});
-app.listen(process.env.PORT || 3000, () => console.log('Web server is running...'));
-setInterval(() => {
-  https.get('https://classbot-nathanfallet.herokuapp.com');
-}, 280000);
 
 // create a new Discord client
 const client = new Discord.Client();
@@ -44,14 +36,24 @@ con.connect(function(err) {
     if (err) throw err;
   });
 
+  // Setup web
+  app.get('/', (request, response) => {
+    console.log(moment().format('[Le] DD/MM/YYYY [à] HH:mm') + ' Ping Received');
+    response.sendStatus(200);
+  });
+  app.listen(process.env.PORT || 3000, () => console.log('Web server is running!'));
+
   // when the client is ready, run this code
   // this event will only trigger one time after logging in
   client.once('ready', () => {
     // Log
-  	console.log('Ready!');
+  	console.log('Discord bot is running!');
 
     // Run to check for a course
     setInterval(() => {
+      // Keep the server up
+      https.get('https://classbot-nathanfallet.herokuapp.com');
+
       // Fetch all courses
       con.query('SELECT cours.id as id, profs.name as name, cours.start as start FROM cours LEFT JOIN profs ON cours.prof = profs.id', (err, results, fields) => {
         if (err) {
@@ -71,7 +73,7 @@ con.connect(function(err) {
           if (moment(date).isBetween(before, after)) {
             // Course will start soon
             client.channels.fetch('695281383991672927').then(channel => {
-              channel.send('<@689751752198586436> Le cours de `' + name + ' ' + moment(date).format('[du] DD/MM/YY [à] HH:mm') + '` va bientôt commencer !')
+              channel.send('<@689751752198586436> Le cours de `' + name + ' ' + moment(date).format('[du] DD/MM/YYYY [à] HH:mm') + '` va bientôt commencer !')
             }).catch(console.error);
           }
         }
@@ -177,7 +179,7 @@ con.connect(function(err) {
           var date = new Date(results[cour].start);
 
           // Add string
-          string += '\n- `' + name +', ' + moment(date).format('[le] DD/MM/YY [à] HH:mm') +'`';
+          string += '\n- `' + name +', ' + moment(date).format('[le] DD/MM/YYYY [à] HH:mm') +'`';
         }
         message.channel.send(string);
       });
