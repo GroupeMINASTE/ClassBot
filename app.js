@@ -93,12 +93,12 @@ con.connect(function(err) {
           if (error) {
             return console.error(error.message);
           }
-          if (results) {
+          if (results && results.length > 0) {
             con.query('SELECT * FROM profs WHERE user = ? AND name = ?', [message.author.id, args[0]], (error, profs, fields) => {
               if (error) {
                 return console.error(error.message);
               }
-              if (profs) {
+              if (profs && profs.length > 0) {
                 // Get date and time
                 var date = args[1].split('/');
                 var heure = args[2].split(':');
