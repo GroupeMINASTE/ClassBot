@@ -55,7 +55,7 @@ con.connect(function(err) {
       https.get('https://classbot-nathanfallet.herokuapp.com');
 
       // Fetch all courses
-      con.query('SELECT cours.id as id, profs.name as name, cours.start as start, profs.user as user FROM cours LEFT JOIN profs ON cours.prof = profs.id', (err, results, fields) => {
+      con.query('SELECT cours.id as id, profs.name as name, cours.start as start, profs.user as user FROM cours LEFT JOIN profs ON cours.prof = profs.id ORDER BY start', (err, results, fields) => {
         if (err) {
           return console.error(err.message);
         }
@@ -174,10 +174,31 @@ con.connect(function(err) {
       }
     }
 
+    // List porfs
+    else if (command == 'matières') {
+      // Fetch all courses
+      con.query('SELECT * FROM profs', (err, results, fields) => {
+        if (err) {
+          return console.error(err.message);
+        }
+
+        // List them
+        var string = 'Voici les matières :';
+        for (cour in results) {
+          var name = results[cour].name;
+          var user = results[cour].user;
+
+          // Add string
+          string += '\n- `' + name +'` (professeur : <@' + user +'>)';
+        }
+        message.channel.send(string);
+      });
+    }
+
     // List courses
     else if (command == 'liste') {
       // Fetch all courses
-      con.query('SELECT cours.id as id, profs.name as name, cours.start as start, profs.user as user FROM cours LEFT JOIN profs ON cours.prof = profs.id', (err, results, fields) => {
+      con.query('SELECT cours.id as id, profs.name as name, cours.start as start, profs.user as user FROM cours LEFT JOIN profs ON cours.prof = profs.id ORDER BY start', (err, results, fields) => {
         if (err) {
           return console.error(err.message);
         }
