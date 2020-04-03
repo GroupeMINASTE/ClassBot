@@ -26,7 +26,7 @@ con.connect(function(err) {
   console.log('Connected!');
 
   // Setup database
-  con.query('CREATE TABLE IF NOT EXISTS `profs` (`id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, `user` bigint(11) NOT NULL, `name` varchar(255) NOT NULL);', function (err, result) {
+  con.query('CREATE TABLE IF NOT EXISTS `profs` (`id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, `user` varchar(255) NOT NULL, `name` varchar(255) NOT NULL);', function (err, result) {
     if (err) throw err;
   });
   con.query('CREATE TABLE IF NOT EXISTS `cours` (`id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, `prof` int(11) NOT NULL, `start` datetime NOT NULL);', function (err, result) {
