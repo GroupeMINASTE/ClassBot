@@ -131,6 +131,23 @@ con.connect(function(err) {
         message.reply('Il y a un problème avec ta commande, essaye `$cours <matière> <jour/mois/année> <heure:minutes>`');
       }
     }
+
+    // List courses
+    else if (command == 'liste') {
+      // Fetch all courses
+      con.query('SELECT * FROM cours LEFT JOIN profs ON cours.prof = profs.id', (err, results, fields) => {
+        if (err) {
+          return console.error(err.message);
+        }
+
+        // List them
+        var string = 'Voici les cours à venir :';
+        for (cour in results) {
+          string += '\n- `' + cour.name +'` à `' + cour.start +'`';
+        }
+        message.channel.send(string);
+      });
+    }
   });
 
   // login to Discord with your app's token
