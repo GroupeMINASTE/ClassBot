@@ -2,6 +2,7 @@
 const Discord = require('discord.js');
 const mysql = require('mysql');
 const https = require('https');
+const moment = require('moment');
 const express = require('express');
 
 // Support for HTTP
