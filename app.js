@@ -76,7 +76,7 @@ con.connect(function(err) {
           if (moment(date).isBetween(before, after)) {
             // Course will start soon
             client.channels.fetch(process.env.CHANNEL).then(channel => {
-              channel.send('<@' + process.env.ROLE + '> Le cours de `' + name + ' ' + moment(date).format('[du] DD/MM/YYYY [à] HH:mm') + '` avec <@' + user + '> va bientôt commencer !')
+              channel.send('<@&' + process.env.ROLE + '> Le cours de `' + name + ' ' + moment(date).format('[du] DD/MM/YYYY [à] HH:mm') + '` avec <@' + user + '> va bientôt commencer !')
             }).catch(console.error);
           } else if (moment(date).isAfter(expired)) {
             // Delete the course
@@ -112,7 +112,7 @@ con.connect(function(err) {
           if (moment(date).isBetween(before, after)) {
             // Course will start soon
             client.channels.fetch(process.env.CHANNEL).then(channel => {
-              channel.send('<@' + process.env.ROLE + '> Les devoirs de `' + name + ' pour ' + moment(date).format('[le] DD/MM/YYYY') + '` sont à rendre à <@' + user + '> !```' + content + '```')
+              channel.send('<@&' + process.env.ROLE + '> Les devoirs de `' + name + ' pour ' + moment(date).format('[le] DD/MM/YYYY') + '` sont à rendre à <@' + user + '> !```' + content + '```')
             }).catch(console.error);
           } else if (moment(date).isAfter(expired)) {
             // Delete the course
