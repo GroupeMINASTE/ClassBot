@@ -145,7 +145,7 @@ con.connect(function(err) {
         for (cour in results) {
           var name = results[cour].name;
           var date = new Date(results[cour].start);
-          string += '\n- `' + name +'` => `' + date.toLocaleDateString('fr-FR') +'`';
+          string += '\n- `' + name +'` => `' + moment(date).format('[le] DD/MM/YY [à] hh:mm') +'`';
         }
         message.channel.send(string);
       });
