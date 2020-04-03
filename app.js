@@ -273,7 +273,7 @@ con.connect(function(err) {
         for (cour in results) {
           var name = results[cour].name;
           var content = results[cour].content;
-          var date = new Date(results[cour].start);
+          var date = new Date(results[cour].due);
 
           // Add string
           string += '\n- `' + name +', pour ' + moment(date).format('[le] DD/MM/YYYY') +'` : ' + content;
