@@ -2,8 +2,12 @@
 const Discord = require('discord.js');
 const mysql = require('mysql');
 const https = require('https');
+const path = require('path');
 const moment = require('moment');
 const express = require('express');
+
+// Our classes
+const Database = require(path.join(__dirname, 'Database'));
 
 // Support for HTTP
 const app = express();
@@ -26,20 +30,21 @@ con.connect(function(err) {
   console.log('Connected!');
 
   // Setup database
-  con.query('CREATE TABLE IF NOT EXISTS `profs` (`id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, `user` varchar(255) NOT NULL, `name` varchar(255) NOT NULL);', function (err, result) {
-    if (err) throw err;
-  });
-  con.query('CREATE TABLE IF NOT EXISTS `cours` (`id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, `prof` int(11) NOT NULL, `start` datetime NOT NULL);', function (err, result) {
-    if (err) throw err;
-  });
-  con.query('CREATE TABLE IF NOT EXISTS `devoirs` (`id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, `prof` int(11) NOT NULL, `content` text NOT NULL, `due` datetime NOT NULL);', function (err, result) {
-    if (err) throw err;
-  });
+  var db = new Database(con);
 
   // Setup web
   app.get('/', (request, response) => {
-    console.log(moment().format('[Le] DD/MM/YYYY [à] HH:mm') + ' Ping Received');
     response.sendStatus(200);
+  });
+  app.get('/classbot', (request, response) => {
+    response.json({ classbot: 'true' });
+  });
+  app.get('/api', (request, response) => {
+    db.getCours((cours) => {
+      db.getDevoirs((devoirs) => {
+        response.json({ cours: cours, devoirs: devoirs });
+      });
+    });
   });
   app.listen(process.env.PORT || 3000, () => console.log('Web server is running!'));
 
@@ -52,14 +57,12 @@ con.connect(function(err) {
     // Run to check for a course
     setInterval(() => {
       // Keep the server up
-      https.get('https://classbot-nathanfallet.herokuapp.com');
+      if (process.env.HOST !== undefined) {
+        https.get('https://' + process.env.HOST);
+      }
 
       // Fetch all courses
-      con.query('SELECT cours.id as id, profs.name as name, cours.start as start, profs.user as user FROM cours LEFT JOIN profs ON cours.prof = profs.id ORDER BY start', (err, results, fields) => {
-        if (err) {
-          return console.error(err.message);
-        }
-
+      db.getCours((results) => {
         // Get current interval
         var before = moment();
         var after = moment().add(5, 'minutes');
@@ -78,7 +81,7 @@ con.connect(function(err) {
             client.channels.fetch(process.env.CHANNEL).then(channel => {
               channel.send('<@&' + process.env.ROLE + '> Le cours de `' + name + ' ' + moment(date).format('[du] DD/MM/YYYY [à] HH:mm') + '` avec <@' + user + '> va bientôt commencer !')
             }).catch(console.error);
-          } else if (moment(date).isAfter(expired)) {
+          } else if (moment(date).isBefore(expired)) {
             // Delete the course
             con.query('DELETE FROM cours WHERE id = ?', [id], (err, results, fields) => {
               if (err) {
@@ -90,11 +93,7 @@ con.connect(function(err) {
       });
 
       // Fetch all homeworks
-      con.query('SELECT devoirs.id as id, profs.name as name, devoirs.due as due, devoirs.content as content, profs.user as user FROM devoirs LEFT JOIN profs ON devoirs.prof = profs.id ORDER BY due', (err, results, fields) => {
-        if (err) {
-          return console.error(err.message);
-        }
-
+      db.getDevoirs((results) => {
         // Get current interval
         var before = moment();
         var after = moment().add(5, 'minutes');
@@ -114,7 +113,7 @@ con.connect(function(err) {
             client.channels.fetch(process.env.CHANNEL).then(channel => {
               channel.send('<@&' + process.env.ROLE + '> Les devoirs de `' + name + ' pour ' + moment(date).format('[le] DD/MM/YYYY') + '` sont à rendre à <@' + user + '> !```' + content + '```')
             }).catch(console.error);
-          } else if (moment(date).isAfter(expired)) {
+          } else if (moment(date).isBefore(expired)) {
             // Delete the course
             con.query('DELETE FROM devoirs WHERE id = ?', [id], (err, results, fields) => {
               if (err) {
@@ -167,40 +166,30 @@ con.connect(function(err) {
     else if (command == 'cours') {
       if (args.length == 3) {
         // Get teacher for this sender
-        con.query('SELECT * FROM profs WHERE user = ?', [message.author.id], (error, results, fields) => {
-          if (error) {
-            return console.error(error.message);
-          }
-          if (results && results.length > 0) {
-            con.query('SELECT * FROM profs WHERE user = ? AND name = ?', [message.author.id, args.shift()], (error, profs, fields) => {
-              if (error) {
-                return console.error(error.message);
-              }
-              if (profs && profs.length > 0) {
-                // Get date and time
-                var date = args.shift().split('/');
-                var heure = args.shift().split(':');
+        db.checkProf(message.author.id, args.shift(), (status) => {
+          if (status == 1) {
+            // Get date and time
+            var date = args.shift().split('/');
+            var heure = args.shift().split(':');
 
-                // Check length
-                if (date.length == 3 && heure.length == 2) {
-                  message.reply('J\'ajoute ça tout de suite dans la base de données...');
+            // Check length
+            if (date.length == 3 && heure.length == 2) {
+              message.reply('J\'ajoute ça tout de suite dans la base de données...');
 
-                  // Add to database
-                  con.query('INSERT INTO cours (prof, start) VALUES(?, ?)', [profs[0].id, date[2] + '-' + date[1] + '-' + date[0] + ' ' + heure[0] + ':' + heure[1]], (err, results, fields) => {
-                    if (err) {
-                      return console.error(err.message);
-                    }
-
-                    // Confirme
-                    message.channel.send('Parfait, le cours a été programmé !');
-                  });
-                } else {
-                  message.reply('La date ou l\'heure n\'est pas au bon format, essaye `jj/mm/aaaa hh:mm`');
+              // Add to database
+              con.query('INSERT INTO cours (prof, start) VALUES(?, ?)', [profs[0].id, date[2] + '-' + date[1] + '-' + date[0] + ' ' + heure[0] + ':' + heure[1]], (err, results, fields) => {
+                if (err) {
+                  return console.error(err.message);
                 }
-              } else {
-                message.reply('La matière demandée n\'est pas dans la base de données, ou vous n\'êtes pas professeur de cette matière.');
-              }
-            });
+
+                // Confirme
+                message.channel.send('Parfait, le cours a été programmé !');
+              });
+            } else {
+              message.reply('La date ou l\'heure n\'est pas au bon format, essaye `jj/mm/aaaa hh:mm`');
+            }
+          } else if (status == 2) {
+            message.reply('La matière demandée n\'est pas dans la base de données, ou vous n\'êtes pas professeur de cette matière.');
           } else {
             message.reply('Seuls les professeurs peuvent ajouter des cours.');
           }
@@ -214,42 +203,32 @@ con.connect(function(err) {
     else if (command == 'devoirs') {
       if (args.length > 3) {
         // Get teacher for this sender
-        con.query('SELECT * FROM profs WHERE user = ?', [message.author.id], (error, results, fields) => {
-          if (error) {
-            return console.error(error.message);
-          }
-          if (results && results.length > 0) {
-            con.query('SELECT * FROM profs WHERE user = ? AND name = ?', [message.author.id, args.shift()], (error, profs, fields) => {
-              if (error) {
-                return console.error(error.message);
-              }
-              if (profs && profs.length > 0) {
-                // Get date and time
-                var date = args.shift().split('/');
-                var heure = args.shift().split(':');
+        db.checkProf(message.author.id, args.shift(), (status) => {
+          if (status == 1) {
+            // Get date and time
+            var date = args.shift().split('/');
+            var heure = args.shift().split(':');
 
-                // Check length
-                if (date.length == 3 && heure.length == 2) {
-                  message.reply('J\'ajoute ça tout de suite dans la base de données...');
+            // Check length
+            if (date.length == 3 && heure.length == 2) {
+              message.reply('J\'ajoute ça tout de suite dans la base de données...');
 
-                  // Add to database
-                  con.query('INSERT INTO devoirs (prof, due, content) VALUES(?, ?, ?)', [profs[0].id, date[2] + '-' + date[1] + '-' + date[0] + ' ' + heure[0] + ':' + heure[1], args.join(' ')], (err, results, fields) => {
-                    if (err) {
-                      return console.error(err.message);
-                    }
-
-                    // Confirme
-                    message.channel.send('Parfait, les devoirs ont été programmé !');
-                  });
-                } else {
-                  message.reply('La date ou l\'heure n\'est pas au bon format, essaye `jj/mm/aaaa hh:mm`');
+              // Add to database
+              con.query('INSERT INTO devoirs (prof, due, content) VALUES(?, ?, ?)', [profs[0].id, date[2] + '-' + date[1] + '-' + date[0] + ' ' + heure[0] + ':' + heure[1], args.join(' ')], (err, results, fields) => {
+                if (err) {
+                  return console.error(err.message);
                 }
-              } else {
-                message.reply('La matière demandée n\'est pas dans la base de données, ou vous n\'êtes pas professeur de cette matière.');
-              }
-            });
+
+                // Confirme
+                message.channel.send('Parfait, les devoirs ont été programmé !');
+              });
+            } else {
+              message.reply('La date ou l\'heure n\'est pas au bon format, essaye `jj/mm/aaaa hh:mm`');
+            }
+          } else if (status == 2) {
+            message.reply('La matière demandée n\'est pas dans la base de données, ou vous n\'êtes pas professeur de cette matière.');
           } else {
-            message.reply('Seuls les professeurs peuvent ajouter des devoirs.');
+            message.reply('Seuls les professeurs peuvent ajouter des cours.');
           }
         });
       } else {
@@ -260,11 +239,7 @@ con.connect(function(err) {
     // List porfs
     else if (command == 'matières') {
       // Fetch all courses
-      con.query('SELECT * FROM profs', (err, results, fields) => {
-        if (err) {
-          return console.error(err.message);
-        }
-
+      db.getProfs((results) => {
         // List them
         var string = 'Voici les matières :';
         for (cour in results) {
@@ -281,11 +256,7 @@ con.connect(function(err) {
     // List courses
     else if (command == 'liste') {
       // Fetch all courses
-      con.query('SELECT cours.id as id, profs.name as name, cours.start as start, profs.user as user FROM cours LEFT JOIN profs ON cours.prof = profs.id ORDER BY start', (err, results, fields) => {
-        if (err) {
-          return console.error(err.message);
-        }
-
+      db.getCours((results) => {
         // List them
         var string = 'Voici les cours à venir :';
         for (cour in results) {
@@ -299,11 +270,7 @@ con.connect(function(err) {
       });
 
       // Fetch all homeworks
-      con.query('SELECT devoirs.id as id, profs.name as name, devoirs.due as due, devoirs.content as content, profs.user as user FROM devoirs LEFT JOIN profs ON devoirs.prof = profs.id ORDER BY due', (err, results, fields) => {
-        if (err) {
-          return console.error(err.message);
-        }
-
+      db.getDevoirs((results) => {
         // List them
         var string = 'Voici les devoirs à venir :';
         for (cour in results) {
