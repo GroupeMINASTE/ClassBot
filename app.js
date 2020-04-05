@@ -36,15 +36,18 @@ con.connect(function(err) {
   app.get('/', (request, response) => {
     response.sendStatus(200);
   });
-  app.get('/classbot', (request, response) => {
-    response.json({ classbot: 'true' });
-  });
-  app.get('/api', (request, response) => {
-    db.getCours((cours) => {
-      db.getDevoirs((devoirs) => {
-        response.json({ cours: cours, devoirs: devoirs });
+  app.get('/api/:path', (request, response) => {
+    if (request.params.path == 'classbot') {
+      response.json({ classbot: 'true' });
+    } else if (request.params.path == 'liste') {
+      db.getCours((cours) => {
+        db.getDevoirs((devoirs) => {
+          response.json({ cours: cours, devoirs: devoirs });
+        });
       });
-    });
+    } else {
+      response.sendStatus(404);
+    }
   });
   app.listen(process.env.PORT || 3000, () => console.log('Web server is running!'));
 
