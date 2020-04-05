@@ -49,6 +49,14 @@ con.connect(function(err) {
       response.sendStatus(404);
     }
   });
+  app.set('json replacer', function (key, value) {
+    if (this[key] instanceof Date) {
+      // Replace date format
+      value = moment(this[key]).format('YYYY-MM-DD HH:mm:ss');
+    }
+
+    return value;
+  });
   app.listen(process.env.PORT || 3000, () => console.log('Web server is running!'));
 
   // when the client is ready, run this code
