@@ -196,7 +196,7 @@ con.connect(function(err) {
     else if (command == 'cours') {
       if (args.length == 3) {
         // Get teacher for this sender
-        db.checkProf(message.author.id, args.shift(), (status) => {
+        db.checkProf(message.author.id, args.shift(), process.env.OWNER, (status, prof) => {
           if (status == 1) {
             // Get date and time
             var date = args.shift().split('/');
@@ -207,7 +207,7 @@ con.connect(function(err) {
               message.reply('J\'ajoute ça tout de suite dans la base de données...');
 
               // Add to database
-              con.query('INSERT INTO cours (prof, start) VALUES(?, ?)', [profs[0].id, date[2] + '-' + date[1] + '-' + date[0] + ' ' + heure[0] + ':' + heure[1]], (err, results, fields) => {
+              con.query('INSERT INTO cours (prof, start) VALUES(?, ?)', [prof.id, date[2] + '-' + date[1] + '-' + date[0] + ' ' + heure[0] + ':' + heure[1]], (err, results, fields) => {
                 if (err) {
                   return console.error(err.message);
                 }
@@ -233,7 +233,7 @@ con.connect(function(err) {
     else if (command == 'devoirs') {
       if (args.length > 3) {
         // Get teacher for this sender
-        db.checkProf(message.author.id, args.shift(), (status) => {
+        db.checkProf(message.author.id, args.shift(), process.env.OWNER, (status, prof) => {
           if (status == 1) {
             // Get date and time
             var date = args.shift().split('/');
@@ -244,7 +244,7 @@ con.connect(function(err) {
               message.reply('J\'ajoute ça tout de suite dans la base de données...');
 
               // Add to database
-              con.query('INSERT INTO devoirs (prof, due, content) VALUES(?, ?, ?)', [profs[0].id, date[2] + '-' + date[1] + '-' + date[0] + ' ' + heure[0] + ':' + heure[1], args.join(' ')], (err, results, fields) => {
+              con.query('INSERT INTO devoirs (prof, due, content) VALUES(?, ?, ?)', [prof.id, date[2] + '-' + date[1] + '-' + date[0] + ' ' + heure[0] + ':' + heure[1], args.join(' ')], (err, results, fields) => {
                 if (err) {
                   return console.error(err.message);
                 }

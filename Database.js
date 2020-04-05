@@ -74,24 +74,24 @@ Database.prototype.getProfs = function(callback) {
 };
 
 // Check prof
-Database.prototype.checkProf = function(user, matiere, callback) {
+Database.prototype.checkProf = function(user, matiere, owner, callback) {
   // Fetch all teachers
-  con.query('SELECT * FROM profs WHERE user = ?', [user], (error, results, fields) => {
+  this._con.query('SELECT * FROM profs WHERE user = ? OR ?', [user, user == owner], (error, results, fields) => {
     if (error) {
       return console.error(error.message);
     }
     if (results && results.length > 0) {
-      con.query('SELECT * FROM profs WHERE user = ? AND name = ?', [user, matiere], (error, profs, fields) => {
+      this._con.query('SELECT * FROM profs WHERE (user = ? OR ?) AND name = ?', [user, user == owner, matiere], (error, profs, fields) => {
         if (error) {
           return console.error(error.message);
         }
 
         // Callback
-        callback(profs && profs.length > 0 ? 1 : 2);
+        callback(profs && profs.length > 0 ? 1 : 2, profs[0]);
       });
     } else {
       // Callback
-      callback(3);
+      callback(3, undefined);
     }
   });
 };
