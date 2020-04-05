@@ -96,7 +96,7 @@ con.connect(function(err) {
         // Get current interval
         var before = moment();
         var after = moment().add(5, 'minutes');
-        var expired = moment().add(1, 'hours');
+        var expired = moment().subtract(1, 'hours');
 
         // Check if one is about to start
         for (cour in results) {
@@ -127,7 +127,7 @@ con.connect(function(err) {
         // Get current interval
         var before = moment();
         var after = moment().add(5, 'minutes');
-        var expired = moment().add(1, 'days');
+        var expired = moment().startOf('day');
 
         // Check if one is about to start
         for (cour in results) {
