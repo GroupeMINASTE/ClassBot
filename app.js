@@ -38,7 +38,7 @@ con.connect(function(err) {
   });
   app.get('/api/:path', (request, response) => {
     if (request.params.path == 'classbot') {
-      response.json({ classbot: 'true' });
+      response.json({ classbot: true });
     } else if (request.params.path == 'liste') {
       db.getCours((cours) => {
         db.getDevoirs((devoirs) => {
