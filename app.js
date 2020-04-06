@@ -108,8 +108,9 @@ con.connect(function(err) {
           // Check time
           if (moment(date).isBetween(before, after)) {
             // Course will start soon
+            var message = '<@&' + process.env.ROLE + '> Le cours de `' + name + ' ' + moment(date).format('[du] DD/MM/YYYY [à] HH:mm') + '` avec <@' + user + '> va bientôt commencer !';
             client.channels.fetch(process.env.CHANNEL).then(channel => {
-              channel.send('<@&' + process.env.ROLE + '> Le cours de `' + name + ' ' + moment(date).format('[du] DD/MM/YYYY [à] HH:mm') + '` avec <@' + user + '> va bientôt commencer !')
+              channel.send(message);
             }).catch(console.error);
           } else if (moment(date).isBefore(expired)) {
             // Delete the course
@@ -140,8 +141,9 @@ con.connect(function(err) {
           // Check time
           if (moment(date).isBetween(before, after)) {
             // Course will start soon
+            var message = '<@&' + process.env.ROLE + '> Les devoirs de `' + name + ' pour ' + moment(date).format('[le] DD/MM/YYYY') + '` sont à rendre à <@' + user + '> !```' + content + '```';
             client.channels.fetch(process.env.CHANNEL).then(channel => {
-              channel.send('<@&' + process.env.ROLE + '> Les devoirs de `' + name + ' pour ' + moment(date).format('[le] DD/MM/YYYY') + '` sont à rendre à <@' + user + '> !```' + content + '```')
+              channel.send(message);
             }).catch(console.error);
           } else if (moment(date).isBefore(expired)) {
             // Delete the course
