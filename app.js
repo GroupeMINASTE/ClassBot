@@ -24,6 +24,18 @@ const https = require('https');
 const path = require('path');
 const moment = require('moment');
 const express = require('express');
+const fs = require('fs');
+
+// Check if .env is present
+try {
+  if (fs.existsSync('.env')) {
+    // Load .env file
+    const dotenv = require('dotenv');
+    dotenv.config();
+  }
+} catch (err) {
+  console.error(err);
+}
 
 // Our classes
 const Database = require(path.join(__dirname, 'Database'));

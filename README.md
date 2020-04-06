@@ -4,17 +4,25 @@ ClassBot est un bot Discord pour gérer l'edt et les devoirs pendant la période
 
 ## Installation
 
-Il est connseillé de déployer le bot via le PaaS Heroku, puisqu'il a été conçu pour fonctionner dessus. Pour celà, il faut fork ce dépôt github, puis le sélectionner dans les paramètres de déploiement dans la section github.
+### Heroku
 
-Il est nécessaire de créer un bot Discord sur [le site développeur de Discord](https://discordapp.com/developers/applications). Le token du bot est à copier et à insérer dans les variables de configuration.
+Il est connseillé de déployer le bot via le PaaS Heroku, puisqu'il a été conçu pour fonctionner dessus au début. Pour celà, il faut fork ce dépôt github, puis le sélectionner dans les paramètres de déploiement dans la section github.
 
-Il est aussi nécessaire d'avoir une base de donnée MySQL externe pour le stockage. On en trouve gratuitement sur [db4free.net](https://www.db4free.net) pour ce type d'usage peu gourmant.
+Les variables de configuration sont à entrer dans les paramètres (config vars).
 
-Pour finir, il faut définir les variables de configuration avant de démarrer l'application.
+### Localement
+
+Pour cela, il faut cloner le dépôt, puis lancer le bot avec la commande `node app.js`.
+
+Les variables de configuration sont à entrer dans un fichier `.env`.
 
 ## Configuration
 
-Variables d'environment à définir :
+Il est nécessaire de créer un bot Discord sur [le site développeur de Discord](https://discordapp.com/developers/applications). Le token du bot est à copier et à insérer dans les variables de configuration.
+
+Il est aussi nécessaire d'avoir une base de donnée MySQL externe pour le stockage. Si vous l'hébergez vous même, il suffit d'installer localement mysql, sinon on en trouve gratuitement sur [db4free.net](https://www.db4free.net) pour ce type d'usage peu gourmant.
+
+Pour finir, il faut définir les variables de configuration avant de démarrer l'application :
 
 - `HOST` : Host du serveur (pour le refresh heroku, optionnel)
 - `MYSQL_HOST` : Host de la base de données à utiliser
