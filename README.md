@@ -31,14 +31,13 @@ Pour finir, il faut définir les variables de configuration avant de démarrer l
 - `MYSQL_PASSWORD` : Mot de passe de la base de données à utiliser
 - `TOKEN` : Token du bot Discord
 - `OWNER` : ID de l'utilisateur qui a le droit de gérer les professeurs
-- `ROLE` : ID du rôle à mentionner lors de l'annonce des cours/devoirs
 - `CHANNEL` : ID de la channel dans laquelle sont faites ces annonces
 - `TZ` : Timezone (optionnel)
 
 ## Commandes
 
-- `$prof <id> <matière>` : Ajoute un prof pour la matière
-- `$cours <matière> <jour/mois/année> <heure:minutes>` : Ajoute un cours dans la matière aux horaires données
-- `$devoirs <matière> <jour/mois/année> <heure:minutes> <contenu>` : Ajoute des devoirs
+- `$prof <id> <classe> <matière>` : Ajoute un prof pour la matière
+- `$cours <classe> <matière> <jour/mois/année> <heure:minutes>` : Ajoute un cours dans la matière aux horaires données
+- `$devoirs <classe> <matière> <jour/mois/année> <heure:minutes> <contenu>` : Ajoute des devoirs
 - `$matières` : Liste les matières et les professeurs
 - `$liste` : Liste les cours et les devoirs

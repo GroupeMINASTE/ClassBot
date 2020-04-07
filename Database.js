@@ -23,7 +23,10 @@ function Database(con) {
   this._con = con;
 
   // Setup database
-  this._con.query('CREATE TABLE IF NOT EXISTS `profs` (`id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, `user` varchar(255) NOT NULL, `name` varchar(255) NOT NULL);', function (err, result) {
+  this._con.query('CREATE TABLE IF NOT EXISTS `classes` (`id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, `role` varchar(255) NOT NULL, `name` varchar(255) NOT NULL);', function (err, result) {
+    if (err) throw err;
+  });
+  this._con.query('CREATE TABLE IF NOT EXISTS `profs` (`id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, `user` varchar(255) NOT NULL, `classe` int(11) NOT NULL, `name` varchar(255) NOT NULL);', function (err, result) {
     if (err) throw err;
   });
   this._con.query('CREATE TABLE IF NOT EXISTS `cours` (`id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, `prof` int(11) NOT NULL, `start` datetime NOT NULL);', function (err, result) {
@@ -37,7 +40,7 @@ function Database(con) {
 // Get courses
 Database.prototype.getCours = function(callback) {
   // Fetch all courses
-  this._con.query('SELECT cours.id as id, profs.name as name, cours.start as start, profs.user as user FROM cours LEFT JOIN profs ON cours.prof = profs.id ORDER BY start', (err, results, fields) => {
+  this._con.query('SELECT cours.id as id, profs.name as name, classes.name as classe, classes.role as role, cours.start as start, profs.user as user FROM cours LEFT JOIN profs ON cours.prof = profs.id LEFT JOIN classes ON profs.classe = classes.id ORDER BY start', (err, results, fields) => {
     if (err) {
       return console.error(err.message);
     }
@@ -50,7 +53,7 @@ Database.prototype.getCours = function(callback) {
 // Get homeworks
 Database.prototype.getDevoirs = function(callback) {
   // Fetch all courses
-  this._con.query('SELECT devoirs.id as id, profs.name as name, devoirs.due as due, devoirs.content as content, profs.user as user FROM devoirs LEFT JOIN profs ON devoirs.prof = profs.id ORDER BY due', (err, results, fields) => {
+  this._con.query('SELECT devoirs.id as id, profs.name as name, classes.name as classe, classes.role as role, devoirs.due as due, devoirs.content as content, profs.user as user FROM devoirs LEFT JOIN profs ON devoirs.prof = profs.id LEFT JOIN classes ON profs.classe = classes.id ORDER BY due', (err, results, fields) => {
     if (err) {
       return console.error(err.message);
     }
@@ -63,7 +66,7 @@ Database.prototype.getDevoirs = function(callback) {
 // Get profs
 Database.prototype.getProfs = function(callback) {
   // Fetch all teachers
-  this._con.query('SELECT * FROM profs', (err, results, fields) => {
+  this._con.query('SELECT profs.id as id, profs.name as name, classes.name as classe, classes.role as role, profs.user as user FROM profs LEFT JOIN classes ON profs.classe = classes.id', (err, results, fields) => {
     if (err) {
       return console.error(err.message);
     }
@@ -74,14 +77,14 @@ Database.prototype.getProfs = function(callback) {
 };
 
 // Check prof
-Database.prototype.checkProf = function(user, matiere, owner, callback) {
+Database.prototype.checkProf = function(user, classe, matiere, owner, callback) {
   // Fetch all teachers
-  this._con.query('SELECT * FROM profs WHERE user = ? OR ?', [user, user == owner], (error, results, fields) => {
+  this._con.query('SELECT profs.id as id, profs.name as name, profs.user as user, classes.name as classe FROM profs LEFT JOIN classes ON profs.classe = classes.id WHERE profs.user = ? OR ?', [user, user == owner], (error, results, fields) => {
     if (error) {
       return console.error(error.message);
     }
     if (results && results.length > 0) {
-      this._con.query('SELECT * FROM profs WHERE (user = ? OR ?) AND name = ?', [user, user == owner, matiere], (error, profs, fields) => {
+      this._con.query('SELECT profs.id as id, profs.name as name, profs.user as user, classes.name as classe FROM profs LEFT JOIN classes ON profs.classe = classes.id WHERE (profs.user = ? OR ?) AND classes.name = ? AND profs.name = ?', [user, user == owner, classe, matiere], (error, profs, fields) => {
         if (error) {
           return console.error(error.message);
         }
@@ -93,6 +96,56 @@ Database.prototype.checkProf = function(user, matiere, owner, callback) {
       // Callback
       callback(3, undefined);
     }
+  });
+};
+
+// Add prof
+Database.prototype.addProf = function (user, classe, name, callback) {
+  // Check classe
+  this._con.query('SELECT * FROM classes WHERE name = ?', [classe], (error, results, fields) => {
+    if (error) {
+      return console.error(error.message);
+    }
+    if (results && results.length > 0) {
+      // Insert in database
+      this._con.query('INSERT INTO profs (user, classe, name) VALUES(?, ?, ?)', [user, results[0].id, name], (err, results, fields) => {
+        if (err) {
+          return console.error(err.message);
+        }
+
+        // Callback
+        callback(1);
+      });
+    } else {
+      // Callback
+      callback(2);
+    }
+  });
+};
+
+// Add cours
+Database.prototype.addCours = function (prof, date, heure, callback) {
+  // Insert in database
+  this._con.query('INSERT INTO cours (prof, start) VALUES(?, ?)', [prof, date[2] + '-' + date[1] + '-' + date[0] + ' ' + heure[0] + ':' + heure[1]], (err, results, fields) => {
+    if (err) {
+      return console.error(err.message);
+    }
+
+    // Callback
+    callback();
+  });
+};
+
+// Add devoirs
+Database.prototype.addDevoirs = function (prof, date, heure, content, callback) {
+  // Insert in database
+  this._con.query('INSERT INTO devoirs (prof, due, content) VALUES(?, ?, ?)', [prof, date[2] + '-' + date[1] + '-' + date[0] + ' ' + heure[0] + ':' + heure[1], content], (err, results, fields) => {
+    if (err) {
+      return console.error(err.message);
+    }
+
+    // Callback
+    callback();
   });
 };
 
