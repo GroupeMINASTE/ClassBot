@@ -99,6 +99,19 @@ Database.prototype.checkProf = function(user, classe, matiere, owner, callback) 
   });
 };
 
+// Add classe
+Database.prototype.addClasse = function (role, name, callback) {
+  // Insert in database
+  this._con.query('INSERT INTO classes (role, name) VALUES(?, ?)', [role, name], (err, results, fields) => {
+    if (err) {
+      return console.error(err.message);
+    }
+
+    // Callback
+    callback(1);
+  });
+};
+
 // Add prof
 Database.prototype.addProf = function (user, classe, name, callback) {
   // Check classe

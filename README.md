@@ -36,7 +36,8 @@ Pour finir, il faut définir les variables de configuration avant de démarrer l
 
 ## Commandes
 
-- `$prof <id> <classe> <matière>` : Ajoute un prof pour la matière
+- `$classe <id> <classe>` : Ajoute une classe lié au rôle
+- `$prof <id> <classe> <matière>` : Ajoute un prof pour la matière et la classe
 - `$cours <classe> <matière> <jour/mois/année> <heure:minutes>` : Ajoute un cours dans la matière aux horaires données
 - `$devoirs <classe> <matière> <jour/mois/année> <heure:minutes> <contenu>` : Ajoute des devoirs
 - `$matières` : Liste les matières et les professeurs

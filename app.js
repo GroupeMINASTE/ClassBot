@@ -191,8 +191,29 @@ con.connect(function(err) {
     if (command == 'ping') {
       // Ping
       message.reply('Pong');
-    } else if (command == 'prof') {
-      // Add a teacher
+    }
+
+    // Add a classe
+    else if (command == 'classe') {
+      if (message.author.id == process.env.OWNER) {
+        if (args.length == 2) {
+          message.reply('J\'ajoute ça tout de suite dans la base de données...');
+
+          // Add to database
+          db.addClasse(args[0], args[1], () => {
+            // Confirme
+            message.channel.send('Parfait, la classe ' + args[1] + ' (<@&' + args[0] + '>) a été crée');
+          });
+        } else {
+          message.reply('Il y a un problème avec ta commande, essaye `$prof <id> <classe> <matière>');
+        }
+      } else {
+        message.reply('Tu n\'as pas le droit de gérer la liste des professeurs, demande à <@' + process.env.OWNER + '> de le faire.');
+      }
+    }
+
+    // Add a teacher
+    else if (command == 'prof') {
       if (message.author.id == process.env.OWNER) {
         if (args.length == 3) {
           message.reply('J\'ajoute ça tout de suite dans la base de données...');
