@@ -72,6 +72,23 @@ class Database {
     });
   };
 
+  // COURS
+
+  // Add cours
+  addCours(prof, date, heure, callback) {
+    // Insert in database
+    this._con.query('INSERT INTO cours (prof, start) VALUES(?, ?)', [prof, date[2] + '-' + date[1] + '-' + date[0] + ' ' + heure[0] + ':' + heure[1]], (err, results, fields) => {
+      if (err) {
+        return console.error(err.message);
+      }
+
+      // Callback
+      callback();
+    });
+  }
+
+  // DEVOIRS
+
   // Get homeworks
   getDevoirs(callback) {
     // Fetch all courses
@@ -84,6 +101,21 @@ class Database {
       callback(results);
     });
   }
+
+  // Add devoirs
+  addDevoirs(prof, date, heure, content, callback) {
+    // Insert in database
+    this._con.query('INSERT INTO devoirs (prof, due, content) VALUES(?, ?, ?)', [prof, date[2] + '-' + date[1] + '-' + date[0] + ' ' + heure[0] + ':' + heure[1], content], (err, results, fields) => {
+      if (err) {
+        return console.error(err.message);
+      }
+
+      // Callback
+      callback();
+    });
+  }
+
+  // PROFS
 
   // Get profs
   getProfs(callback) {
@@ -121,19 +153,6 @@ class Database {
     });
   }
 
-  // Add classe
-  addClasse(role, name, callback) {
-    // Insert in database
-    this._con.query('INSERT INTO classes (role, name) VALUES(?, ?)', [role, name], (err, results, fields) => {
-      if (err) {
-        return console.error(err.message);
-      }
-
-      // Callback
-      callback(1);
-    });
-  }
-
   // Add prof
   addProf(user, classe, name, callback) {
     // Check classe
@@ -158,29 +177,31 @@ class Database {
     });
   }
 
-  // Add cours
-  addCours(prof, date, heure, callback) {
-    // Insert in database
-    this._con.query('INSERT INTO cours (prof, start) VALUES(?, ?)', [prof, date[2] + '-' + date[1] + '-' + date[0] + ' ' + heure[0] + ':' + heure[1]], (err, results, fields) => {
+  // CLASSES
+
+  // Get classes
+  getClasses(callback) {
+    // Fetch all teachers
+    this._con.query('SELECT * FROM classes', (err, results, fields) => {
       if (err) {
         return console.error(err.message);
       }
 
       // Callback
-      callback();
+      callback(results);
     });
   }
 
-  // Add devoirs
-  addDevoirs(prof, date, heure, content, callback) {
+  // Add classe
+  addClasse(role, name, callback) {
     // Insert in database
-    this._con.query('INSERT INTO devoirs (prof, due, content) VALUES(?, ?, ?)', [prof, date[2] + '-' + date[1] + '-' + date[0] + ' ' + heure[0] + ':' + heure[1], content], (err, results, fields) => {
+    this._con.query('INSERT INTO classes (role, name) VALUES(?, ?)', [role, name], (err, results, fields) => {
       if (err) {
         return console.error(err.message);
       }
 
       // Callback
-      callback();
+      callback(1);
     });
   }
 

@@ -69,19 +69,19 @@ class Web {
 
   // General list
   liste(request, response) {
-    var db = this._db;
-    db.getCours((cours) => {
-      db.getDevoirs((devoirs) => {
-        response.json({ cours: cours, devoirs: devoirs });
+    this._db.getClasses((classes) => {
+      this._db.getCours((cours) => {
+        this._db.getDevoirs((devoirs) => {
+          response.json({ classes: classes, cours: cours, devoirs: devoirs });
+        });
       });
     });
   }
 
   // List for class
   listeClass(request, response) {
-    var db = this._db;
-    db.getCours((cours) => {
-      db.getDevoirs((devoirs) => {
+    this._db.getCours((cours) => {
+      this._db.getDevoirs((devoirs) => {
         response.json({ cours: cours.filter(cours => cours.classe == request.params.classe), devoirs: devoirs.filter(devoirs => devoirs.classe == request.params.classe) });
       });
     });
