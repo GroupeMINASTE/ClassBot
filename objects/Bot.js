@@ -49,6 +49,7 @@ class Bot {
     setInterval(() => {
       // Keep the server up
       if (process.env.HOST !== undefined) {
+        const https = require('https');
         https.get('https://' + process.env.HOST);
       }
 

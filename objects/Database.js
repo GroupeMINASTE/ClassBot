@@ -20,22 +20,42 @@
 class Database {
 
   // Constructor
-  constructor(con) {
-    // Save connection
-    this._con = con;
+  constructor(callback) {
+    // Import MySQL
+    const mysql = require('mysql');
 
-    // Setup database
-    this._con.query('CREATE TABLE IF NOT EXISTS `classes` (`id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, `role` varchar(255) NOT NULL, `name` varchar(255) NOT NULL);', function (err, result) {
-      if (err) throw err;
+    // Init connection
+    this._con = mysql.createConnection({
+      host: process.env.MYSQL_HOST,
+      user: process.env.MYSQL_USERNAME,
+      password: process.env.MYSQL_PASSWORD,
+      database: process.env.MYSQL_DATABASE
     });
-    this._con.query('CREATE TABLE IF NOT EXISTS `profs` (`id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, `user` varchar(255) NOT NULL, `classe` int(11) NOT NULL, `name` varchar(255) NOT NULL);', function (err, result) {
+
+    // Connect
+    this._con.connect((err) => {
+      // Check for errors
       if (err) throw err;
-    });
-    this._con.query('CREATE TABLE IF NOT EXISTS `cours` (`id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, `prof` int(11) NOT NULL, `start` datetime NOT NULL);', function (err, result) {
-      if (err) throw err;
-    });
-    this._con.query('CREATE TABLE IF NOT EXISTS `devoirs` (`id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, `prof` int(11) NOT NULL, `content` text NOT NULL, `due` datetime NOT NULL);', function (err, result) {
-      if (err) throw err;
+
+      // We are connected!
+      console.log('Connected to database!');
+
+      // Setup database
+      this._con.query('CREATE TABLE IF NOT EXISTS `classes` (`id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, `role` varchar(255) NOT NULL, `name` varchar(255) NOT NULL);', function (err, result) {
+        if (err) throw err;
+      });
+      this._con.query('CREATE TABLE IF NOT EXISTS `profs` (`id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, `user` varchar(255) NOT NULL, `classe` int(11) NOT NULL, `name` varchar(255) NOT NULL);', function (err, result) {
+        if (err) throw err;
+      });
+      this._con.query('CREATE TABLE IF NOT EXISTS `cours` (`id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, `prof` int(11) NOT NULL, `start` datetime NOT NULL);', function (err, result) {
+        if (err) throw err;
+      });
+      this._con.query('CREATE TABLE IF NOT EXISTS `devoirs` (`id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, `prof` int(11) NOT NULL, `content` text NOT NULL, `due` datetime NOT NULL);', function (err, result) {
+        if (err) throw err;
+      });
+
+      // Callback
+      callback();
     });
   }
 

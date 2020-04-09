@@ -18,12 +18,7 @@
  */
 
 // Require the modules
-const Discord = require('discord.js');
-const mysql = require('mysql');
-const https = require('https');
 const path = require('path');
-const moment = require('moment');
-const express = require('express');
 const fs = require('fs');
 
 // Check if .env is present
@@ -42,23 +37,8 @@ const Database = require(path.join(__dirname, 'objects/Database'));
 const Web = require(path.join(__dirname, 'objects/Web'));
 const Bot = require(path.join(__dirname, 'objects/Bot'));
 
-// Connect to the database
-var con = mysql.createConnection({
-  host: process.env.MYSQL_HOST,
-  user: process.env.MYSQL_USERNAME,
-  password: process.env.MYSQL_PASSWORD,
-  database: process.env.MYSQL_DATABASE
-});
-con.connect(function(err) {
-  // Check for errors
-  if (err) throw err;
-
-  // We are connected!
-  console.log('Connected!');
-
-  // Setup database
-  var db = new Database(con);
-
+// Setup database
+var db = new Database(() => {
   // Setup Web server
   var web = new Web(db);
 
