@@ -56,6 +56,59 @@ class Bot {
       // Import moment
       const moment = require('moment');
 
+
+      // Day summary
+      if (moment().isBetween(moment().hours(7).minutes(50), moment().hours(7).minutes(55))) {
+        this._db.getCours((cours) => {
+          this._db.getDevoirs((devoirs) => {
+            // Get current interval
+            var before = moment().startOf('day');
+            var after = moment().endOf('day');
+
+            // Filter
+            var filteredCours = cours.filter(element => moment(new Date(element.start)).isBetween(before, after));
+            var filteredDevoirs = devoirs.filter(element => moment(new Date(element.due)).isBetween(before, after));
+
+            // If not empty
+            if (filteredCours.length > 0 || filteredDevoirs.length > 0) {
+              // Hello message
+              var string = 'Bonjour à tous, j\'espère que vous avez bien dormi !\n';
+
+              // Cours
+              if (filteredCours.length > 0) {
+                string += '\nVoici le programme de la journée :';
+                var cour;
+                for (cour of filteredCours) {
+                  var name = cour.name;
+                  var classe = cour.classe;
+                  var date = new Date(cour.start);
+
+                  // Add string
+                  string += '```' + name +' (' + classe + '), ' + moment(date).format('[à] HH:mm') +'```';
+                }
+              }
+
+              // Devoirs
+              if (filteredDevoirs.length > 0) {
+                string += '\nVoici les devoirs à faire pour aujourd\'hui :';
+                var cour;
+                for (cour of filteredDevoirs) {
+                  var name = cour.name;
+                  var classe = cour.classe;
+                  var content = cour.content;
+
+                  // Add string
+                  string += '```' + name +' (' + classe + ') : ' + content + '```';
+                }
+              }
+
+              // Send this message
+              this.sendMessage(process.env.CHANNEL, string);
+            }
+          });
+        });
+      }
+
       // Fetch all courses
       this._db.getCours((results) => {
         // Get current interval
@@ -64,7 +117,8 @@ class Bot {
         var expired = moment().subtract(1, 'hours');
 
         // Check if one is about to start
-        results.forEach(cour => {
+        var cour;
+        for (cour of results) {
           var id = cour.id;
           var name = cour.name;
           var classe = cour.classe;
@@ -84,7 +138,7 @@ class Bot {
               }
             });
           }
-        });
+        }
       });
 
       // Fetch all homeworks
@@ -95,7 +149,8 @@ class Bot {
         var expired = moment().startOf('day');
 
         // Check if one is about to start
-        results.forEach(cour => {
+        var cour;
+        for (cour of results) {
           var id = cour.id;
           var name = cour.name;
           var classe = cour.classe;
@@ -116,7 +171,7 @@ class Bot {
               }
             });
           }
-        });
+        }
       });
     }, 300000);
   }
@@ -253,14 +308,15 @@ class Bot {
       this._db.getProfs((results) => {
         // List them
         var string = 'Voici les matières :';
-        results.forEach(cour => {
+        var cour;
+        for (cour of results) {
           var name = cour.name;
           var user = cour.user;
           var role = cour.role;
 
           // Add string
           string += '\n- `' + name +'` (<@&' + role +'> avec <@' + user +'>)';
-        });
+        }
         message.channel.send(string);
       });
     }
@@ -271,14 +327,15 @@ class Bot {
       this._db.getCours((results) => {
         // List them
         var string = 'Voici les cours à venir :';
-        results.forEach(cour => {
+        var cour;
+        for (cour of results) {
           var name = cour.name;
           var classe = cour.classe;
           var date = new Date(cour.start);
 
           // Add string
           string += '```' + name +' (' + classe + '), ' + moment(date).format('[le] DD/MM/YYYY [à] HH:mm') +'```';
-        });
+        }
         message.channel.send(string);
       });
 
@@ -286,7 +343,8 @@ class Bot {
       this._db.getDevoirs((results) => {
         // List them
         var string = 'Voici les devoirs à venir :';
-        results.forEach(cour => {
+        var cour;
+        for (cour of results) {
           var name = cour.name;
           var classe = cour.classe;
           var content = cour.content;
@@ -294,7 +352,7 @@ class Bot {
 
           // Add string
           string += '```' + name +' (' + classe + '), pour ' + moment(date).format('[le] DD/MM/YYYY') +' : ' + content + '```';
-        });
+        }
         message.channel.send(string);
       });
     }
