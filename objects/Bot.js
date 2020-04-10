@@ -129,7 +129,7 @@ class Bot {
           // Check time
           if (moment(date).isBetween(before, after)) {
             // Course will start soon
-            this.sendMessage(process.env.CHANNEL, '<@&' + role + '> Le cours de `' + name + ' (' + classe + ') ' + moment(date).format('[du] DD/MM/YYYY [à] HH:mm') + '` avec <@' + user + '> va bientôt commencer !');
+            this.sendMessage(process.env.CHANNEL, '<@&' + role + '> Le cours de `' + name + ' (' + classe + ') ' + moment(date).format('[du] DD/MM/YYYY [à] HH:mm') + '` ' + (user != 'NO' ? ' avec <@' + user + '>' : '') + ' va bientôt commencer !');
           } else if (moment(date).isBefore(expired)) {
             // Delete the course
             this._db._con.query('DELETE FROM cours WHERE id = ?', [id], (err, results, fields) => {
@@ -162,7 +162,7 @@ class Bot {
           // Check time
           if (moment(date).isBetween(before, after)) {
             // Course will start soon
-            this.sendMessage(process.env.CHANNEL, '<@&' + role + '> N\'oubliez pas les devoirs de `' + name + ' (' + classe + ') pour ' + moment(date).format('[le] DD/MM/YYYY') + '` avec <@' + user + '> !```' + content + '```');
+            this.sendMessage(process.env.CHANNEL, '<@&' + role + '> N\'oubliez pas les devoirs de `' + name + ' (' + classe + ') pour ' + moment(date).format('[le] DD/MM/YYYY') + '`' + (user != 'NO' ? ' avec <@' + user + '>' : '') + ' !```' + content + '```');
           } else if (moment(date).isBefore(expired)) {
             // Delete the course
             this._db._con.query('DELETE FROM devoirs WHERE id = ?', [id], (err, results, fields) => {
@@ -223,7 +223,7 @@ class Bot {
           this._db.addProf(args[0], args[1], args[2], (status) => {
             if (status == 1) {
               // Confirme
-              message.channel.send('Parfait, <@' + args[0] + '> est maintenant défini(e) comme professeur(e) de ' + args[2] + ' pour la classe ' + args[1]);
+              message.channel.send('Parfait, ' + (args[0] != 'NO' ? '<@' + args[0] + '> est maintenant défini(e) comme professeur(e) de ' + args[2] : 'la matière ' + args[2] + ' a été crée') + ' pour la classe ' + args[1]);
             } else {
               message.reply('La classe demandée n\'a pas été trouvée !');
             }
@@ -315,7 +315,7 @@ class Bot {
           var role = cour.role;
 
           // Add string
-          string += '\n- `' + name +'` (<@&' + role +'> avec <@' + user +'>)';
+          string += '\n- `' + name +'` (<@&' + role +'>' + (user != 'NO' ? ' avec <@' + user + '>' : '') + ')';
         }
         message.channel.send(string);
       });
