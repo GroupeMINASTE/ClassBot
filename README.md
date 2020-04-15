@@ -42,3 +42,7 @@ Pour finir, il faut définir les variables de configuration avant de démarrer l
 - `$devoirs <classe> <matière> <jour/mois/année> <heure:minutes> <contenu>` : Ajoute des devoirs
 - `$matières` : Liste les matières et les professeurs
 - `$liste` : Liste les cours et les devoirs
+
+## Accès mobile
+
+Téléchargement de l'application: [Google Play](https://play.google.com/store/apps/details?id=me.nathanfallet.classbot), [App Store](https://apps.apple.com/app/classbot/id1506465267)
