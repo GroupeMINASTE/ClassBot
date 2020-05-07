@@ -70,7 +70,7 @@ class Database {
       // Callback
       callback(results);
     });
-  };
+  }
 
   // COURS
 
